@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,10 +8,35 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MapPin, Phone, Clock, ShoppingCart, Star, Quote, ChevronDown, ExternalLink } from "lucide-react";
-import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
+import { motion, useReducedMotion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
+
+// Component for scroll-triggered fade-in animations
+function FadeInSection({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 50 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 0.8, delay, ease: [0.25, 0.1, 0.25, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function Home() {
   const prefersReducedMotion = useReducedMotion();
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  
+  const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
 
   const slides = [
     {
@@ -57,7 +82,12 @@ export default function Home() {
       {/* Main Content */}
       <main>
         {/* Hero Section - Carousel */}
-        <section id="home" className="relative bg-gradient-to-br from-amber-50 to-yellow-100 py-20 overflow-hidden">
+        <motion.section 
+          ref={heroRef}
+          id="home" 
+          className="relative bg-gradient-to-br from-amber-50 to-yellow-100 py-20 overflow-hidden"
+          style={prefersReducedMotion ? {} : { opacity: heroOpacity, scale: heroScale }}
+        >
           <div className="container mx-auto px-4">
             <div className="relative h-[600px] md:h-[500px]">
               <AnimatePresence mode="wait">
@@ -166,45 +196,65 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Features Section */}
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-3 gap-8">
-              <Card>
-                <CardHeader>
-                  <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
-                    <ShoppingCart className="h-6 w-6 text-yellow-600" />
-                  </div>
-                  <CardTitle>Fresh Daily</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">All our waffles and gelato are made fresh every day using traditional recipes and premium ingredients.</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
-                    <Star className="h-6 w-6 text-yellow-600" />
-                  </div>
-                  <CardTitle>Authentic Taste</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Experience the genuine flavors of Hong Kong street food, crafted by our expert team.</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
-                    <MapPin className="h-6 w-6 text-yellow-600" />
-                  </div>
-                  <CardTitle>Three Locations</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Visit us at any of our three convenient locations across New Zealand.</p>
-                </CardContent>
-              </Card>
+              <FadeInSection delay={0}>
+                <Card className="h-full hover:shadow-xl transition-shadow duration-300">
+                  <CardHeader>
+                    <motion.div 
+                      className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <ShoppingCart className="h-6 w-6 text-yellow-600" />
+                    </motion.div>
+                    <CardTitle>Fresh Daily</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">All our waffles and gelato are made fresh every day using traditional recipes and premium ingredients.</p>
+                  </CardContent>
+                </Card>
+              </FadeInSection>
+              
+              <FadeInSection delay={0.2}>
+                <Card className="h-full hover:shadow-xl transition-shadow duration-300">
+                  <CardHeader>
+                    <motion.div 
+                      className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <Star className="h-6 w-6 text-yellow-600" />
+                    </motion.div>
+                    <CardTitle>Authentic Taste</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">Experience the genuine flavors of Hong Kong street food, crafted by our expert team.</p>
+                  </CardContent>
+                </Card>
+              </FadeInSection>
+              
+              <FadeInSection delay={0.4}>
+                <Card className="h-full hover:shadow-xl transition-shadow duration-300">
+                  <CardHeader>
+                    <motion.div 
+                      className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <MapPin className="h-6 w-6 text-yellow-600" />
+                    </motion.div>
+                    <CardTitle>Three Locations</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">Visit us at any of our three convenient locations across New Zealand.</p>
+                  </CardContent>
+                </Card>
+              </FadeInSection>
             </div>
           </div>
         </section>
@@ -213,37 +263,47 @@ export default function Home() {
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-4xl font-bold text-gray-900 mb-4">Origin of Bubble Waffle</h2>
-              </div>
+              <FadeInSection>
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold text-gray-900 mb-4">Origin of Bubble Waffle</h2>
+                </div>
+              </FadeInSection>
               <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                  <p className="text-lg text-gray-700 mb-6">
-                    Bubble Waffle is a traditional street snack originally from Hong Kong. It is said to have appeared in Hong Kong in the 1950s. The most representative traditional street food.
-                  </p>
-                  <p className="text-lg text-gray-700 mb-6">
-                    The bubble waffle is made with eggs, sugar, flour, evaporated milk, etc., poured in the middle of two special honeycomb iron templates, and placed on the fire and baked. The bubble waffle comes out golden yellow, with the aroma of cake, and the middle is half empty, crispy outside and the taste is particularly elastic when bitten.
-                  </p>
-                  <p className="text-lg text-gray-700 mb-6">
-                    However, with the evolution of modernization, it has generally begun to replace the charcoal burning flavor with an electronic oven.
-                  </p>
-                  <p className="text-lg text-gray-700">
-                    In 2015, Egg Waffle was successfully selected as a Michelin snack. HKS wish to brought this Hong Kong&apos;s most representative snack to New Zealand to share the sweetness with you!
-                  </p>
-                </div>
-                <div className="relative">
-                  <div className="aspect-square overflow-hidden rounded-lg relative">
-                    <Image 
-                      src="https://images.unsplash.com/photo-1488477181946-6428a0291777" 
-                      alt="Bubble Waffle" 
-                      fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover"
-                      loading="lazy"
-                      quality={70}
-                    />
+                <FadeInSection delay={0.2}>
+                  <div className="space-y-6">
+                    <p className="text-lg text-gray-700">
+                      Bubble Waffle is a traditional street snack originally from Hong Kong. It is said to have appeared in Hong Kong in the 1950s. The most representative traditional street food.
+                    </p>
+                    <p className="text-lg text-gray-700">
+                      The bubble waffle is made with eggs, sugar, flour, evaporated milk, etc., poured in the middle of two special honeycomb iron templates, and placed on the fire and baked. The bubble waffle comes out golden yellow, with the aroma of cake, and the middle is half empty, crispy outside and the taste is particularly elastic when bitten.
+                    </p>
+                    <p className="text-lg text-gray-700">
+                      However, with the evolution of modernization, it has generally begun to replace the charcoal burning flavor with an electronic oven.
+                    </p>
+                    <p className="text-lg text-gray-700">
+                      In 2015, Egg Waffle was successfully selected as a Michelin snack. HKS wish to brought this Hong Kong&apos;s most representative snack to New Zealand to share the sweetness with you!
+                    </p>
                   </div>
-                </div>
+                </FadeInSection>
+                <FadeInSection delay={0.4}>
+                  <div className="relative">
+                    <motion.div 
+                      className="aspect-square overflow-hidden rounded-lg relative"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                    >
+                      <Image 
+                        src="https://images.unsplash.com/photo-1488477181946-6428a0291777" 
+                        alt="Bubble Waffle" 
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover"
+                        loading="lazy"
+                        quality={70}
+                      />
+                    </motion.div>
+                  </div>
+                </FadeInSection>
               </div>
             </div>
           </div>
@@ -253,237 +313,201 @@ export default function Home() {
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-4xl font-bold text-gray-900 mb-4">OUR STORY</h2>
-              </div>
+              <FadeInSection>
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold text-gray-900 mb-4">OUR STORY</h2>
+                </div>
+              </FadeInSection>
               <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div className="relative">
-                  <div className="aspect-square overflow-hidden rounded-lg relative">
-                    <Image 
-                      src="https://images.unsplash.com/photo-1497034825429-c343d7c6a68f" 
-                      alt="HKS Store" 
-                      fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover"
-                      loading="lazy"
-                      quality={70}
-                    />
+                <FadeInSection delay={0.2}>
+                  <div className="relative">
+                    <motion.div 
+                      className="aspect-square overflow-hidden rounded-lg relative"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                    >
+                      <Image 
+                        src="https://images.unsplash.com/photo-1497034825429-c343d7c6a68f" 
+                        alt="HKS Store" 
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover"
+                        loading="lazy"
+                        quality={70}
+                      />
+                    </motion.div>
                   </div>
-                </div>
-                <div>
-                  <p className="text-lg text-gray-700 mb-6">
-                    Hong Kong Station (HKS), was founded in 2018 by two ladies from Hong Kong at the center of Auckland. It introduces Hong Kong local street food into New Zealand, It specializes in Bubble Waffles, Checkered Waffles, Hong Kong-style milk tea, and customized bubble-waffle ice cream and so on, this is also our childhood.
-                  </p>
-                  <p className="text-lg text-gray-700 mb-6">
-                    In keeping with the traditional craftsmanship and combined with modern and innovative methods, we launched a variety of sweet, salty, spicy bubble waffles and other Hong Kong street food.
-                  </p>
-                  <p className="text-lg text-gray-700">
-                    We also thinking of our guests, observe carefully, and treat every customer.
-                  </p>
-                </div>
+                </FadeInSection>
+                <FadeInSection delay={0.4}>
+                  <div className="space-y-6">
+                    <p className="text-lg text-gray-700">
+                      Hong Kong Station (HKS), was founded in 2018 by two ladies from Hong Kong at the center of Auckland. It introduces Hong Kong local street food into New Zealand, It specializes in Bubble Waffles, Checkered Waffles, Hong Kong-style milk tea, and customized bubble-waffle ice cream and so on, this is also our childhood.
+                    </p>
+                    <p className="text-lg text-gray-700">
+                      In keeping with the traditional craftsmanship and combined with modern and innovative methods, we launched a variety of sweet, salty, spicy bubble waffles and other Hong Kong street food.
+                    </p>
+                    <p className="text-lg text-gray-700">
+                      We also thinking of our guests, observe carefully, and treat every customer.
+                    </p>
+                  </div>
+                </FadeInSection>
               </div>
             </div>
           </div>
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-20 bg-gray-50">
+        <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">What Our Customers Say</h2>
-              <p className="text-xl text-gray-600">Don&apos;t just take our word for it</p>
-            </div>
+            <FadeInSection>
+              <div className="text-center mb-12">
+                <h2 className="text-4xl font-bold text-gray-900 mb-4">What Our Customers Say</h2>
+                <p className="text-xl text-gray-600">Don&apos;t just take our word for it</p>
+              </div>
+            </FadeInSection>
             <div className="grid md:grid-cols-3 gap-8">
-              <Card>
-                <CardHeader>
-                  <Quote className="h-8 w-8 text-yellow-600 mb-4" />
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 mb-4">&ldquo;The best egg waffles I&apos;ve ever had! Takes me right back to Hong Kong. The gelato combination is absolutely divine.&rdquo;</p>
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="h-10 w-10 rounded-full bg-yellow-200 flex items-center justify-center">
-                        <span className="text-yellow-700 font-semibold">SL</span>
+              <FadeInSection delay={0}>
+                <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                  <CardHeader>
+                    <Quote className="h-8 w-8 text-yellow-600 mb-4" />
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 mb-4">&ldquo;The best egg waffles I&apos;ve ever had! Takes me right back to Hong Kong. The gelato combination is absolutely divine.&rdquo;</p>
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="h-10 w-10 rounded-full bg-yellow-200 flex items-center justify-center">
+                          <span className="text-yellow-700 font-semibold">SL</span>
+                        </div>
+                      </div>
+                      <div className="ml-3">
+                        <p className="font-semibold text-gray-900">Sarah Lee</p>
+                        <div className="flex text-yellow-500">
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                        </div>
                       </div>
                     </div>
-                    <div className="ml-3">
-                      <p className="font-semibold text-gray-900">Sarah Lee</p>
-                      <div className="flex text-yellow-500">
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </FadeInSection>
 
-              <Card>
-                <CardHeader>
-                  <Quote className="h-8 w-8 text-yellow-600 mb-4" />
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 mb-4">&ldquo;My kids absolutely love this place! The staff are friendly and the quality is consistently excellent. Highly recommend!&rdquo;</p>
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="h-10 w-10 rounded-full bg-yellow-200 flex items-center justify-center">
-                        <span className="text-yellow-700 font-semibold">JW</span>
+              <FadeInSection delay={0.2}>
+                <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                  <CardHeader>
+                    <Quote className="h-8 w-8 text-yellow-600 mb-4" />
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 mb-4">&ldquo;My kids absolutely love this place! The staff are friendly and the quality is consistently excellent. Highly recommend!&rdquo;</p>
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="h-10 w-10 rounded-full bg-yellow-200 flex items-center justify-center">
+                          <span className="text-yellow-700 font-semibold">JW</span>
+                        </div>
+                      </div>
+                      <div className="ml-3">
+                        <p className="font-semibold text-gray-900">James Wilson</p>
+                        <div className="flex text-yellow-500">
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                        </div>
                       </div>
                     </div>
-                    <div className="ml-3">
-                      <p className="font-semibold text-gray-900">James Wilson</p>
-                      <div className="flex text-yellow-500">
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </FadeInSection>
 
-              <Card>
-                <CardHeader>
-                  <Quote className="h-8 w-8 text-yellow-600 mb-4" />
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 mb-4">&ldquo;Perfect treat after shopping! The matcha waffle with vanilla gelato is my go-to. Fresh, delicious, and great value.&rdquo;</p>
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="h-10 w-10 rounded-full bg-yellow-200 flex items-center justify-center">
-                        <span className="text-yellow-700 font-semibold">EP</span>
+              <FadeInSection delay={0.4}>
+                <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                  <CardHeader>
+                    <Quote className="h-8 w-8 text-yellow-600 mb-4" />
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 mb-4">&ldquo;Perfect treat after shopping! The matcha waffle with vanilla gelato is my go-to. Fresh, delicious, and great value.&rdquo;</p>
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="h-10 w-10 rounded-full bg-yellow-200 flex items-center justify-center">
+                          <span className="text-yellow-700 font-semibold">EP</span>
+                        </div>
+                      </div>
+                      <div className="ml-3">
+                        <p className="font-semibold text-gray-900">Emma Patel</p>
+                        <div className="flex text-yellow-500">
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                          <Star className="h-4 w-4 fill-current" />
+                        </div>
                       </div>
                     </div>
-                    <div className="ml-3">
-                      <p className="font-semibold text-gray-900">Emma Patel</p>
-                      <div className="flex text-yellow-500">
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                        <Star className="h-4 w-4 fill-current" />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </FadeInSection>
             </div>
           </div>
         </section>
 
         {/* Gallery Section */}
-        <section id="gallery" className="py-20 bg-white">
+        <section id="gallery" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Gallery</h2>
-              <p className="text-xl text-gray-600">A visual journey through our delicious creations</p>
-            </div>
+            <FadeInSection>
+              <div className="text-center mb-12">
+                <h2 className="text-4xl font-bold text-gray-900 mb-4">Gallery</h2>
+                <p className="text-xl text-gray-600">A visual journey through our delicious creations</p>
+              </div>
+            </FadeInSection>
             <div className="grid md:grid-cols-4 gap-4">
-              <div className="aspect-square overflow-hidden rounded-lg relative">
-                <Image 
-                  src="https://images.unsplash.com/photo-1563805042-7684c019e1cb" 
-                  alt="Ice cream cone" 
-                  fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
-                  className="object-cover hover:scale-110 transition-transform duration-300"
-                  loading="lazy"
-                  quality={70}
-                />
-              </div>
-              <div className="aspect-square overflow-hidden rounded-lg relative">
-                <Image 
-                  src="https://images.unsplash.com/photo-1497034825429-c343d7c6a68f" 
-                  alt="Waffle closeup" 
-                  fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
-                  className="object-cover hover:scale-110 transition-transform duration-300"
-                  loading="lazy"
-                  quality={70}
-                />
-              </div>
-              <div className="aspect-square overflow-hidden rounded-lg relative">
-                <Image 
-                  src="https://images.unsplash.com/photo-1586313219032-b0e1b9ed7b40" 
-                  alt="Gelato flavors" 
-                  fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
-                  className="object-cover hover:scale-110 transition-transform duration-300"
-                  loading="lazy"
-                  quality={70}
-                />
-              </div>
-              <div className="aspect-square overflow-hidden rounded-lg relative">
-                <Image 
-                  src="https://images.unsplash.com/photo-1488477181946-6428a0291777" 
-                  alt="Desserts" 
-                  fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
-                  className="object-cover hover:scale-110 transition-transform duration-300"
-                  loading="lazy"
-                  quality={70}
-                />
-              </div>
-              <div className="aspect-square overflow-hidden rounded-lg relative">
-                <Image 
-                  src="https://images.unsplash.com/photo-1587314168485-3236d6710814" 
-                  alt="Sweet treats" 
-                  fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
-                  className="object-cover hover:scale-110 transition-transform duration-300"
-                  loading="lazy"
-                  quality={70}
-                />
-              </div>
-              <div className="aspect-square overflow-hidden rounded-lg relative">
-                <Image 
-                  src="https://images.unsplash.com/photo-1576618148400-f54bed99fcfd" 
-                  alt="Ice cream scoops" 
-                  fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
-                  className="object-cover hover:scale-110 transition-transform duration-300"
-                  loading="lazy"
-                  quality={70}
-                />
-              </div>
-              <div className="aspect-square overflow-hidden rounded-lg relative">
-                <Image 
-                  src="https://images.unsplash.com/photo-1514849302-984523450cf4" 
-                  alt="Waffle and ice cream" 
-                  fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
-                  className="object-cover hover:scale-110 transition-transform duration-300"
-                  loading="lazy"
-                  quality={70}
-                />
-              </div>
-              <div className="aspect-square overflow-hidden rounded-lg relative">
-                <Image 
-                  src="https://images.unsplash.com/photo-1579954115545-a95591f28bfc" 
-                  alt="Dessert spread" 
-                  fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
-                  className="object-cover hover:scale-110 transition-transform duration-300"
-                  loading="lazy"
-                  quality={70}
-                />
-              </div>
+              {[
+                { src: "https://images.unsplash.com/photo-1563805042-7684c019e1cb", alt: "Ice cream cone" },
+                { src: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f", alt: "Waffle closeup" },
+                { src: "https://images.unsplash.com/photo-1586313219032-b0e1b9ed7b40", alt: "Gelato flavors" },
+                { src: "https://images.unsplash.com/photo-1488477181946-6428a0291777", alt: "Desserts" },
+                { src: "https://images.unsplash.com/photo-1587314168485-3236d6710814", alt: "Sweet treats" },
+                { src: "https://images.unsplash.com/photo-1576618148400-f54bed99fcfd", alt: "Ice cream scoops" },
+                { src: "https://images.unsplash.com/photo-1514849302-984523450cf4", alt: "Waffle and ice cream" },
+                { src: "https://images.unsplash.com/photo-1579954115545-a95591f28bfc", alt: "Dessert spread" }
+              ].map((image, index) => (
+                <FadeInSection key={index} delay={index * 0.1}>
+                  <motion.div 
+                    className="aspect-square overflow-hidden rounded-lg relative group cursor-pointer"
+                    whileHover={{ scale: 1.05, zIndex: 10 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                  >
+                    <Image 
+                      src={image.src} 
+                      alt={image.alt} 
+                      fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
+                      className="object-cover"
+                      loading="lazy"
+                      quality={70}
+                    />
+                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                  </motion.div>
+                </FadeInSection>
+              ))}
             </div>
           </div>
         </section>
 
         {/* Blog Section */}
-        <section id="blog" className="py-20 bg-gray-50">
+        <section id="blog" className="py-20 bg-white">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Latest from Our Blog</h2>
-              <p className="text-xl text-gray-600">Stories, recipes, and news</p>
-            </div>
+            <FadeInSection>
+              <div className="text-center mb-12">
+                <h2 className="text-4xl font-bold text-gray-900 mb-4">Latest from Our Blog</h2>
+                <p className="text-xl text-gray-600">Stories, recipes, and news</p>
+              </div>
+            </FadeInSection>
             <div className="grid md:grid-cols-3 gap-8">
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+              <FadeInSection delay={0}>
+                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-2 h-full">
                 <div className="aspect-square overflow-hidden relative">
                   <Image 
                     src="https://images.unsplash.com/photo-1563805042-7684c019e1cb" 
@@ -506,8 +530,10 @@ export default function Home() {
                   </Button>
                 </CardContent>
               </Card>
+              </FadeInSection>
 
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+              <FadeInSection delay={0.2}>
+              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-2 h-full">
                 <div className="aspect-square overflow-hidden relative">
                   <Image 
                     src="https://images.unsplash.com/photo-1586313219032-b0e1b9ed7b40" 
@@ -530,8 +556,10 @@ export default function Home() {
                   </Button>
                 </CardContent>
               </Card>
+              </FadeInSection>
 
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+              <FadeInSection delay={0.4}>
+              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-2 h-full">
                 <div className="aspect-square overflow-hidden relative">
                   <Image 
                     src="https://images.unsplash.com/photo-1488477181946-6428a0291777" 
@@ -554,27 +582,31 @@ export default function Home() {
                   </Button>
                 </CardContent>
               </Card>
+              </FadeInSection>
             </div>
           </div>
         </section>
 
         {/* Contact Section */}
-        <section id="contact" className="py-20 bg-white">
+        <section id="contact" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Visit Us</h2>
-              <p className="text-xl text-gray-600">Find us at any of our three New Zealand locations</p>
-            </div>
+            <FadeInSection>
+              <div className="text-center mb-12">
+                <h2 className="text-4xl font-bold text-gray-900 mb-4">Visit Us</h2>
+                <p className="text-xl text-gray-600">Find us at any of our three New Zealand locations</p>
+              </div>
+            </FadeInSection>
 
             {/* Store Locations */}
             <div className="grid md:grid-cols-3 gap-8 mb-16">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-yellow-600" />
-                    CBD Store
-                  </CardTitle>
-                </CardHeader>
+              <FadeInSection delay={0}>
+                <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5 text-yellow-600" />
+                      CBD Store
+                    </CardTitle>
+                  </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Address</p>
@@ -597,14 +629,16 @@ export default function Home() {
                   {/* No online ordering button inside Visit Us card */}
                 </CardContent>
               </Card>
+              </FadeInSection>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-yellow-600" />
-                    Sylvia Park Store
-                  </CardTitle>
-                </CardHeader>
+              <FadeInSection delay={0.2}>
+                <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5 text-yellow-600" />
+                      Sylvia Park Store
+                    </CardTitle>
+                  </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Address</p>
@@ -627,14 +661,16 @@ export default function Home() {
                   {/* No online ordering button inside Visit Us card */}
                 </CardContent>
               </Card>
+              </FadeInSection>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-yellow-600" />
-                    Dominion Rd Store
-                  </CardTitle>
-                </CardHeader>
+              <FadeInSection delay={0.4}>
+                <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5 text-yellow-600" />
+                      Dominion Rd Store
+                    </CardTitle>
+                  </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Address</p>
@@ -657,11 +693,13 @@ export default function Home() {
                   {/* No online ordering button inside Visit Us card */}
                 </CardContent>
               </Card>
+              </FadeInSection>
             </div>
 
             {/* Join HKS Form */}
-            <div className="max-w-2xl mx-auto">
-              <Card>
+            <FadeInSection delay={0.3}>
+              <div className="max-w-2xl mx-auto">
+                <Card>
                 <CardHeader>
                   <CardTitle className="text-2xl">Join HKS</CardTitle>
                   <CardDescription>Interested in franchising, partnerships, or joining our team? Let us know!</CardDescription>
@@ -702,6 +740,7 @@ export default function Home() {
                 </CardContent>
               </Card>
             </div>
+            </FadeInSection>
           </div>
         </section>
       </main>
