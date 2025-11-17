@@ -1,8 +1,11 @@
+import { Twitter, Facebook, Instagram } from 'lucide-react';
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
             <h3 className="text-2xl font-bold mb-4">HKS</h3>
@@ -13,10 +16,10 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="/#home" className="hover:text-white">Home</a></li>
-              <li><a href="/#gallery" className="hover:text-white">Gallery</a></li>
-              <li><a href="/#blog" className="hover:text-white">Blog</a></li>
-              <li><a href="/#contact" className="hover:text-white">Contact</a></li>
+              <li><Link href="/#home" className="hover:text-white">Home</Link></li>
+              <li><Link href="/#gallery" className="hover:text-white">Gallery</Link></li>
+              <li><Link href="/#blog" className="hover:text-white">Blog</Link></li>
+              <li><Link href="/#contact" className="hover:text-white">Contact</Link></li>
             </ul>
           </div>
 
@@ -28,6 +31,22 @@ export default function Footer() {
                 <span className="sr-only">Email</span>
                 <a href="mailto:hkstationwaffle@gmail.com" className="hover:text-white">hkstationwaffle@gmail.com</a>
               </div>
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div>
+            <h4 className="font-semibold mb-4">Follow Us</h4>
+            <div className="flex space-x-4">
+              <a href="https://x.com/HKS80372331" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Twitter" className="text-gray-400 hover:text-white">
+                <Twitter size={24} />
+              </a>
+              <a href="https://www.facebook.com/HKstationWaffle" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Facebook" className="text-gray-400 hover:text-white">
+                <Facebook size={24} />
+              </a>
+              <a href="https://www.instagram.com/hkstation_nz/" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram" className="text-gray-400 hover:text-white">
+                <Instagram size={24} />
+              </a>
             </div>
           </div>
         </div>
